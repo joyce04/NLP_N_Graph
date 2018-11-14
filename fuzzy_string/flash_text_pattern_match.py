@@ -19,7 +19,7 @@ def get_side_effects():
 
 def get_drugs():
     _cur = conn.cursor()
-    select_sql = """select distinct(lower(cui1_str)) from dict_collapsed_final WHERE exclude=0"""
+    select_sql = """select distinct(lower(cui1_str)) from dict_collapsed_final"""
     _cur.execute(select_sql)
     return _cur.fetchall()
 
