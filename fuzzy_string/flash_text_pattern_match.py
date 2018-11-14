@@ -1,3 +1,101 @@
+import math
+from flashtext import KeywordProcessor
+from db_conn import get_connection
+import datetime
+
+def get_table_ids():
+    _cur = conn.cursor()
+    select_sql = """select id from article_tables order by id"""
+    _cur.execute(select_sql)
+    return _cur.fetchall()
+
+def get_side_effects():
+    _cur = conn.cursor()
+    select_sql = """select distinct(lower(llt_name)) from meddra_llt_180717 WHERE exclude=0"""
+    _cur.execute(select_sql)
+    return _cur.fetchall()
+
+def get_drugs():
+    _cur = conn.cursor()
+    select_sql = """select distinct(lower(cui1_str)) from dict_collapsed_final"""
+    _cur.execute(select_sql)
+    return _cur.fetchall()
+
+def get_sentences_to_search(ids):
+    _cur = conn.cursor()
+    select_sql = """select id, sentence from article_table_sentences where table_id in %s"""
+
+    _cur.execute(select_sql, (tuple(ids),))
+    row_count = _cur.rowcount
+    return _cur.fetchall()
+
+def get_sentences_to_search_m(ids):
+    _cur = conn.cursor()
+    select_sql_m = """select id, sentence from article_table_sentences_m where table_id in %s"""
+
+    _cur.execute(select_sql_m, (tuple(ids),))
+    row_count = _cur.rowcount
+    
+    return _cur.fetchall()
+
+def copy_into_table(col, rows):
+    _cur = conn.cursor()
+    if col =='drug':
+        _cur.executemany(
+            '''
+                UPDATE article_table_sentences
+                SET
+                    drug = %(drug)s
+                WHERE
+                    id = %(id)s
+            ''',
+            tuple(rows)
+        )
+    else:
+        _cur.executemany(
+            '''
+                UPDATE article_table_sentences
+                SET
+                    adverse_effect = %(adverse_effect)s
+                WHERE
+                    id = %(id)s
+            ''',
+            tuple(rows)
+        )
+
+    row_count = _cur.rowcount
+    conn.commit()
+    print(row_count)
+
+def copy_into_table_m(col, rows):
+    _cur = conn.cursor()
+    if col=='drug':
+        _cur.executemany(
+            '''
+                UPDATE article_table_sentences_m
+                SET
+                    drug = %(drug)s
+                WHERE
+                    id = %(id)s
+            ''',
+            tuple(rows)
+        )
+    else:
+                _cur.executemany(
+            '''
+                UPDATE article_table_sentences_m
+                SET
+                    adverse_effect = %(adverse_effect)s
+                WHERE
+                    id = %(id)s
+            ''',
+            tuple(rows)
+        )
+
+    row_count = _cur.rowcount
+    conn.commit()
+    print(row_count)
+    
 start_time = datetime.datetime.now()
 
 conn = get_connection()
