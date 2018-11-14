@@ -56,12 +56,17 @@ df_pos_dr.shape
 
 not_in_dict = []
 for dr in df_pos_dr.iterrows():
+    
     dr_ = '%'+dr[1]['p_drug'].lower().strip().replace('(', '').replace(',', '').replace(':', '').replace('+', '').replace(';', '').replace('.', '').replace(')', '')+'%'
     cursor.execute("select * from dict_collapsed_final where lower(cui1_str) like '%s' or lower(cui2_str) like '%s';" % (dr_, dr_))
     already_in = cursor.fetchall()
     if len(already_in) ==0 and dr_.replace('%', '') not in ['otherwise', 'distribution', 'fathers', 'other','maintenance', 'father', 'dosing' ,'maintenance']:
-        print(dr_.replace('%', ''))
-        not_in_dict.append({'drug':dr_.replace('%', '').strip(), 'id':dr[1]['id']})
+        try:
+            print(dr_.replace('%', ''))
+            not_in_dict.append({'drug':dr_.replace('%', '').strip(), 'id':dr[1]['id']})
+        except UnicodeDecodeError:
+            print(dr_.replace("\u000B", "").replace('%', ''))
+            not_in_dict.append({'drug':dr_.replace("\u000B", "").replace('%', '').strip(), 'id':dr[1]['id']})
 
 with open('possible_drugs.csv', 'w') as file:
     for d in not_in_dict:
