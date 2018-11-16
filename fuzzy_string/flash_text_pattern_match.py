@@ -192,10 +192,5 @@ for i in range(1000, len(ids)+1000, 1000):
     print(str(i-1000)+':'+str(i))
     print('llts : ' +str(update_llts(ids[i-1000:i])))
     print('drugs:' + str(update_drugs(ids[i-1000:i])))
-<<<<<<< Updated upstream
 
 print(start_time - datetime.datetime.now())
-=======
-    
-print(start_time - datetime.datetime.now())
->>>>>>> Stashed changes
