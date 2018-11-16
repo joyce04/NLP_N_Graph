@@ -22,14 +22,14 @@ from fuzzywuzzy import process
 # choices = ['I love computer science', 'COMPUTER SCIENCE', 'computer programming', 'programming IT']
 # process.extract('computer science', choices, limit=3, scorer=fuzz.token_set_ratio)
 
-tables_count = 6000
+tables_count = 5500
 retrieve_strip_html = """select strip_tags(content) as c, table_title, id
                         from article_tables
                         order by id
                         limit 1000 offset %s"""
 
 possible_drugs = []
-for c in range(70):
+for c in range(55):
     print(c*1000)
     print(retrieve_strip_html % (c*1000))
     cursor.execute(retrieve_strip_html % (c*1000))
@@ -56,7 +56,7 @@ df_pos_dr.shape
 
 not_in_dict = []
 for dr in df_pos_dr.iterrows():
-    
+
     dr_ = '%'+dr[1]['p_drug'].lower().strip().replace('(', '').replace(',', '').replace(':', '').replace('+', '').replace(';', '').replace('.', '').replace(')', '')+'%'
     cursor.execute("select * from dict_collapsed_final where lower(cui1_str) like '%s' or lower(cui2_str) like '%s';" % (dr_, dr_))
     already_in = cursor.fetchall()
@@ -68,6 +68,6 @@ for dr in df_pos_dr.iterrows():
             print(dr_.replace("\u000B", "").replace('%', ''))
             not_in_dict.append({'drug':dr_.replace("\u000B", "").replace('%', '').strip(), 'id':dr[1]['id']})
 
-with open('possible_drugs.csv', 'w') as file:
+with open('possible_drugs.tsv', 'w') as file:
     for d in not_in_dict:
         file.write(d[0]+'\t'+d[1])
