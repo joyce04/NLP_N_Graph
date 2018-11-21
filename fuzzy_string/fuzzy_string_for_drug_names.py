@@ -8,7 +8,7 @@ conn = db_conn.get_connection()
 cursor = conn.cursor()#(pymysql.cursors.DictCursor)
 
 # get drug list from dictionary table
-cursor.execute('SELECT * FROM dict_collapsed_final')
+cursor.execute('SELECT * FROM dict_extended_final')
 drugs = pd.DataFrame(cursor.fetchall(), columns=['cui1', 'cui2', 'cui1_str', 'cui2_str'])
 print(drugs[:5])
 # similarity_gtl_80 = []
@@ -58,7 +58,7 @@ not_in_dict = []
 for dr in df_pos_dr.iterrows():
 
     dr_ = '%'+dr[1]['p_drug'].lower().strip().replace('(', '').replace(',', '').replace(':', '').replace('+', '').replace(';', '').replace('.', '').replace(')', '')+'%'
-    cursor.execute("select * from dict_collapsed_final where lower(cui1_str) like '%s' or lower(cui2_str) like '%s';" % (dr_, dr_))
+    cursor.execute("select * from dict_collapsed_final where lower(cui1_str) like %s or lower(cui2_str) like %s" % (dr_, dr_))
     already_in = cursor.fetchall()
     if len(already_in) ==0 and dr_.replace('%', '') not in ['otherwise', 'distribution', 'fathers', 'other','maintenance', 'father', 'dosing' ,'maintenance']:
         try:
