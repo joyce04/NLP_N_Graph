@@ -40,8 +40,8 @@ for c in range(55):
                 doc = nlp(rc)
                 n_chunks = [chunk for chunk in doc.noun_chunks]
                 best_words = process.extractBests(d, n_chunks, limit=2, scorer=fuzz.token_set_ratio)
-                p_drugs = list(map(lambda x: str(str(x[0]).replace('\u2217', '')), list(filter(lambda x: x[1]>=70, best_words))))
-
+                p_drugs = list(map(lambda x: str(str(x[0]).replace('\u2217', '').replace('\xb1', '')), list(filter(lambda x: x[1]>=70, best_words))))
+                p_drugs = list(filter(lambda x: lower(x) not in ['group', 'groups', 'expression', 'change', 'age', 'stranger', 'range'], p_drugs))
                 for p in p_drugs:
                     print('\t' + str(p_drugs))
                     dr_ = "'%"+p.lower().strip().replace('(', '').replace(',', '').replace(':', '').replace('+', '').replace(';', '').replace('.', '').replace(')', '')+"%'"
