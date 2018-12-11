@@ -16,15 +16,17 @@ side_effects = pd.DataFrame(cursor.fetchall(), columns=['llt_code', 'llt_name'])
 print(side_effects[:5])
 
 from fuzzywuzzy import process
-tables_count = 5500
+tables_count = 27928
 retrieve_strip_html = """select strip_tags(content) as c, table_title, id
                         from article_tables
+                        where topic_num_title is not null
                         order by id
                         limit 1000 offset %s"""
 
 possible_side_effects = []
 not_in_dict = []
-for c in range(55):
+not_in = open('pos_check_side_effects.tsv', 'w')
+for c in range(27):
     print(c*1000)
     # print(retrieve_strip_html % (c*1000))
     cursor.execute(retrieve_strip_html % (c*1000))
@@ -41,10 +43,10 @@ for c in range(55):
                 n_chunks = [chunk for chunk in doc.noun_chunks]
                 best_words = process.extractBests(d, n_chunks, limit=2, scorer=fuzz.token_set_ratio)
                 p_drugs = list(map(lambda x: str(str(x[0]).replace('\u2217', '').replace('\xb1', '')), list(filter(lambda x: x[1]>=70, best_words))))
-                p_drugs = list(filter(lambda x: lower(x) not in ['group', 'groups', 'expression', 'change', 'age', 'stranger', 'range'], p_drugs))
+                p_drugs = list(filter(lambda x: x.lower() not in ['group', 'p values', 'cause', 'setting', 'synergy', 'association', 'duration', 'observation', 'classification', 'tables', 'values', 'groups', 'expression', 'change', 'age', 'stranger', 'range'], p_drugs))
                 for p in p_drugs:
                     print('\t' + str(p_drugs))
-                    dr_ = "'%"+p.lower().strip().replace('(', '').replace(',', '').replace(':', '').replace('+', '').replace(';', '').replace('.', '').replace(')', '')+"%'"
+                    dr_ = "'%"+p.lower().strip().strip("\'").replace('(', '').replace(',', '').replace(':', '').replace('+', '').replace(';', '').replace('.', '').replace(')', '')+"%'"
                     cursor.execute("select * from meddra_llt_181022 where lower(llt_name) like %s" % (dr_, ))
                     already_in = cursor.fetchall()
                     if len(already_in) ==0:
@@ -54,7 +56,9 @@ for c in range(55):
                         except UnicodeDecodeError:
                             print(dr_.replace("\u000B", "").replace('%', ''))
                             not_in_dict.append({'p_s':dr_.replace("\u000B", "").replace('%', '').strip(), 'id':r[2]})
+                        not_in.write(not_in_dict[len(not_in_dict)-1]['p_s']+'\t'+str(r[2]))
 
+not_in.close()
 not_in_dict_df = pd.DataFrame(not_in_dict)
 not_in_dict_df.drop_duplicates(subset=['p_s'], inplace=True)
 
