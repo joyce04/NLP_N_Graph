@@ -11,10 +11,21 @@ I am majorly focused on extracting relational information from unstructured data
 
 Overview of repository
 
-1. Topic modeling - LDA (unigram, bigram, trigram)
+1. Topic modeling
+   1. LDA (unigram, bigram, trigram) - mallet, tfidf
 2. K-means
-3. String matching - Aho corasick(FlastText), Fuzzy string matching(Fuzzywuzzy)
+3. String matching 
+   1. Aho corasick(FlastText) 
+   2. Fuzzy string matching(Fuzzywuzzy)
 4. Entity Recognition
+   1. [spaCy][https://github.com/joyce04/nlp/tree/master/entity_recognition]
+5. Embedding
+   1. [Deep Embedding Clustering][https://github.com/joyce04/nlp/blob/master/embedding/1.%20DEC.ipynb]
+   2. [Word2Vec][https://github.com/joyce04/nlp/blob/master/embedding/word2vec.ipynb]
+   3. fastText
+   4. ELMo(Embeddings from Language Model)
+6. Transfer learning
+   1. ULMFiT
 
 
 
@@ -79,4 +90,5 @@ Overview of NLP
 Reference:
 
 - https://nlpforhackers.io
+- https://github.com/makcedward/nlp
 
