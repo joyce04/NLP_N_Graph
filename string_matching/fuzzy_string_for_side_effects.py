@@ -43,7 +43,7 @@ for c in range(27):
                 n_chunks = [chunk for chunk in doc.noun_chunks]
                 best_words = process.extractBests(d, n_chunks, limit=2, scorer=fuzz.token_set_ratio)
                 p_drugs = list(map(lambda x: str(str(x[0]).replace('\u2217', '').replace('\xb1', '')), list(filter(lambda x: x[1]>=70, best_words))))
-                p_drugs = list(filter(lambda x: x.lower() not in ['group', 'p values', 'cause', 'setting', 'synergy', 'association', 'duration', 'observation', 'classification', 'tables', 'values', 'groups', 'expression', 'change', 'age', 'stranger', 'range'], p_drugs))
+                p_drugs = list(filter(lambda x: x.lower() not in ['group', 'p values', 'identification', 'differences', 'cause', 'setting', 'synergy', 'association', 'duration', 'observation', 'classification', 'tables', 'values', 'groups', 'expression', 'change', 'age', 'stranger', 'range'], p_drugs))
                 for p in p_drugs:
                     print('\t' + str(p_drugs))
                     dr_ = "'%"+p.lower().strip().strip("\'").replace('(', '').replace(',', '').replace(':', '').replace('+', '').replace(';', '').replace('.', '').replace(')', '')+"%'"
