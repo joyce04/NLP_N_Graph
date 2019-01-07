@@ -106,6 +106,7 @@ def update_drugs(ids):
     drugs = list(map(lambda x: x[0], get_drugs()))
     keyword_processor = KeywordProcessor(case_sensitive=False)
     for d in drugs:
+        keyword_processor.add_keyword((d.strip()).encode('utf-8'))
         keyword_processor.add_keyword((' '+d.strip()+' ').encode('utf-8'))
         keyword_processor.add_keyword(('-'+d.strip()).encode('utf-8'))
         keyword_processor.add_keyword((d.strip()+'-').encode('utf-8'))
@@ -115,13 +116,17 @@ def update_drugs(ids):
     for sen in sentences:
         id = sen[0]
 
+        ori_found = []
         found = []
         found = keyword_processor.extract_keywords(sen[1].encode('utf-8').strip().lower())
         if len(found)>0:
             _found = list(set(list(map(lambda x: x.decode('utf-8'), found))))
+            sen_strs = sen[1].encode('utf-8').strip().lower().split(' ')
             print(_found)
             print(sen[1].encode('utf-8').strip().lower())
-            update_list.append({'id':id, 'drug':' '+' , '.join(_found)+' '})
+            for f in _found:
+                ori_found.extend(list(filter(lambda x: x.find(f)>=0, sen_strs)))
+            update_list.append({'id':id, 'drug':' '+' , '.join(list(set(ori_found)+' '})
 
     if len(update_list)>0:
         print('update')
@@ -149,40 +154,46 @@ def update_llts(ids):
     side_effects = list(map(lambda x: x[0], get_side_effects()))
     keyword_processor = KeywordProcessor(case_sensitive=False)
     for side in side_effects:
+        keyword_processor.add_keyword((side.strip()).encode('utf-8'))                 
         keyword_processor.add_keyword((' '+side.strip()+' ').encode('utf-8'))
         keyword_processor.add_keyword(('-'+side.strip()).encode('utf-8'))
         keyword_processor.add_keyword((side.strip()+'-').encode('utf-8'))
 
-    update_list = []
-    sentences = get_sentences_to_search(ids)
-    for sen in sentences:
-        id = sen[0]
+#     update_list = []
+#     sentences = get_sentences_to_search(ids)
+#     for sen in sentences:
+#         id = sen[0]
 
-        found = []
-        found = keyword_processor.extract_keywords(sen[1].encode('utf-8').strip().lower())
-        if len(found)>0:
-            _found = list(map(lambda x: x.decode('utf-8'), found))
-            print(_found)
-            print(sen[1].encode('utf-8').strip().lower())
-            update_list.append({'id':id, 'adverse_effect':' '+' , '.join(_found)+' '})
+#         found = []
+#         found = keyword_processor.extract_keywords(sen[1].encode('utf-8').strip().lower())
+#         if len(found)>0:
+#             _found = list(map(lambda x: x.decode('utf-8'), found))
+#             sen_strs = sen[1].encode('utf-8').strip().lower().split(' ')                                                   
+#             print(_found)
+#             print(sen[1].encode('utf-8').strip().lower())
+#             update_list.append({'id':id, 'adverse_effect':' '+' , '.join(_found)+' '})
 
-    if len(update_list)>0:
-        print('update')
-        print(update_list)
-        copy_into_table('ad', update_list)
+#     if len(update_list)>0:
+#         print('update')
+#         print(update_list)
+#         copy_into_table('ad', update_list)
 
     update_list_m = []
     sentences_m = get_sentences_to_search_m(ids)
     for sen in sentences_m:
         id = sen[0]
 
+        ori_found = []                                                      
         found = []
         found = keyword_processor.extract_keywords(sen[1].encode('utf-8').strip().lower())
         if len(found)>0:
             _found = list(map(lambda x: x.decode('utf-8'), found))
+            sen_strs = sen[1].encode('utf-8').strip().lower().split(' ')                                                   
             print(_found)
             print(sen[1].encode('utf-8').strip().lower())
-            update_list_m.append({'id':id, 'adverse_effect':' '+' , '.join(_found)+' '})
+            for f in _found:
+                ori_found.extend(list(filter(lambda x: x.find(f)>=0, sen_strs)))
+            update_list_m.append({'id':id, 'adverse_effect':' '+' , '.join(list(set(ori_found)+' '})
 
     if len(update_list_m)>0:
         print('update m')
