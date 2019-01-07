@@ -126,7 +126,7 @@ def update_drugs(ids):
             print(sen[1].encode('utf-8').strip().lower())
             for f in _found:
                 ori_found.extend(list(filter(lambda x: x.find(f)>=0, sen_strs)))
-            update_list.append({'id':id, 'drug':' '+' , '.join(list(set(ori_found)+' '})
+            update_list.append({'id':id, 'drug':' '+' , '.join(list(set(ori_found)))+' '})
 
     if len(update_list)>0:
         print('update')
@@ -193,7 +193,7 @@ def update_llts(ids):
             print(sen[1].encode('utf-8').strip().lower())
             for f in _found:
                 ori_found.extend(list(filter(lambda x: x.find(f)>=0, sen_strs)))
-            update_list_m.append({'id':id, 'adverse_effect':' '+' , '.join(list(set(ori_found)+' '})
+            update_list_m.append({'id':id, 'adverse_effect':' '+' , '.join(list(set(ori_found)))+' '})
 
     if len(update_list_m)>0:
         print('update m')
