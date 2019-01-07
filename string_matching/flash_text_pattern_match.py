@@ -21,13 +21,13 @@ def get_drugs():
     _cur.execute(select_sql)
     return _cur.fetchall()
 
-def get_sentences_to_search(ids):
-    _cur = conn.cursor()
-    select_sql = """select id, sentence from article_table_sentences where table_id in %s"""
-
-    _cur.execute(select_sql, (tuple(ids),))
-    row_count = _cur.rowcount
-    return _cur.fetchall()
+# def get_sentences_to_search(ids):
+#     _cur = conn.cursor()
+#     select_sql = """select id, sentence from article_table_sentences where table_id in %s"""
+#
+#     _cur.execute(select_sql, (tuple(ids),))
+#     row_count = _cur.rowcount
+#     return _cur.fetchall()
 
 def get_sentences_to_search_m(ids):
     _cur = conn.cursor()
@@ -38,34 +38,34 @@ def get_sentences_to_search_m(ids):
 
     return _cur.fetchall()
 
-def copy_into_table(col, rows):
-    _cur = conn.cursor()
-    if col =='drug':
-        _cur.executemany(
-            '''
-                UPDATE article_table_sentences
-                SET
-                    drug = %(drug)s
-                WHERE
-                    id = %(id)s
-            ''',
-            tuple(rows)
-        )
-    else:
-        _cur.executemany(
-            '''
-                UPDATE article_table_sentences
-                SET
-                    adverse_effect = %(adverse_effect)s
-                WHERE
-                    id = %(id)s
-            ''',
-            tuple(rows)
-        )
-
-    row_count = _cur.rowcount
-    conn.commit()
-    print(row_count)
+# def copy_into_table(col, rows):
+#     _cur = conn.cursor()
+#     if col =='drug':
+#         _cur.executemany(
+#             '''
+#                 UPDATE article_table_sentences
+#                 SET
+#                     drug = %(drug)s
+#                 WHERE
+#                     id = %(id)s
+#             ''',
+#             tuple(rows)
+#         )
+#     else:
+#         _cur.executemany(
+#             '''
+#                 UPDATE article_table_sentences
+#                 SET
+#                     adverse_effect = %(adverse_effect)s
+#                 WHERE
+#                     id = %(id)s
+#             ''',
+#             tuple(rows)
+#         )
+#
+#     row_count = _cur.rowcount
+#     conn.commit()
+#     print(row_count)
 
 def copy_into_table_m(col, rows):
     _cur = conn.cursor()
@@ -106,58 +106,86 @@ def update_drugs(ids):
     drugs = list(map(lambda x: x[0], get_drugs()))
     keyword_processor = KeywordProcessor(case_sensitive=False)
     for d in drugs:
-        keyword_processor.add_keyword((d.strip()).encode('utf-8'))
-        keyword_processor.add_keyword((' '+d.strip()+' ').encode('utf-8'))
-        keyword_processor.add_keyword(('-'+d.strip()).encode('utf-8'))
-        keyword_processor.add_keyword((d.strip()+'-').encode('utf-8'))
+        d = d.encode('ascii', 'replace').decode('ascii')
+        d = d.replace('?', ' ')
+        keyword_processor.add_keyword((' '+d.strip()))#.encode('ascii', 'replace'))
+        keyword_processor.add_keyword((d.strip()+' '))#.encode('ascii', 'replace'))
+        keyword_processor.add_keyword((' '+d.strip()+' '))#.encode('ascii', 'replace'))
+        keyword_processor.add_keyword(('-'+d.strip()))#.encode('ascii', 'replace'))
+        keyword_processor.add_keyword((d.strip()+'-'))#.encode('ascii', 'replace'))
 
-    update_list = []
-    sentences = get_sentences_to_search(ids)
-    for sen in sentences:
-        id = sen[0]
-
-        ori_found = []
-        found = []
-        found = keyword_processor.extract_keywords(sen[1].encode('utf-8').strip().lower())
-        if len(found)>0:
-            _found = list(set(list(map(lambda x: x.decode('utf-8'), found))))
-            sen_strs = sen[1].encode('utf-8').strip().lower().split(' ')
-            print(_found)
-            print(sen[1].encode('utf-8').strip().lower())
-            for f in _found:
-                ori_found.extend(list(filter(lambda x: x.find(f)>=0, sen_strs)))
-            update_list.append({'id':id, 'drug':' '+' , '.join(list(set(ori_found)))+' '})
-
-    if len(update_list)>0:
-        print('update')
-        print(update_list)
-        copy_into_table('drug', update_list)
+    # update_list = []
+    # sentences = get_sentences_to_search(ids)
+    # for sen in sentences:
+    #     id = sen[0]
+    #
+    #     ori_found = []
+    #     found = []
+    #     found = keyword_processor.extract_keywords(sen[1].encode('ascii', 'replace').strip().lower())
+    #     if len(found)>0:
+    #         _found = list(set(list(map(lambda x: x.decode('utf-8'), found))))
+    #         sen_strs = sen[1].encode('ascii', 'replace').strip().lower().split(' ')
+    #         print(_found)
+    #         print(sen[1].encode('ascii', 'replace').strip().lower())
+    #         for f in _found:
+    #             ori_found.extend(list(filter(lambda x: x.find(f)>=0, sen_strs)))
+    #         update_list.append({'id':id, 'drug':' '+' , '.join(list(set(ori_found)))+' '})
+    #
+    # if len(update_list)>0:
+    #     print('update')
+    #     print(update_list)
+    #     copy_into_table('drug', update_list)
 
     update_list_m = []
     sentences_m = get_sentences_to_search_m(ids)
     for sen in sentences_m:
         id = sen[0]
 
+        ori_found = []
         found = []
-        found = keyword_processor.extract_keywords(sen[1].encode('utf-8').strip().lower())
+        s = (u' '+sen[1].lower()).encode('ascii', 'replace').decode('ascii')
+        s = str(s).replace('?', ' ')
+        print(s)
+        found = keyword_processor.extract_keywords(s)
         if len(found)>0:
-            _found = list(map(lambda x: x.decode('utf-8'), found))
-            print(_found)
-            print(sen[1].encode('utf-8').strip().lower())
-            update_list_m.append({'id':id, 'drug':' '+' , '.join(_found)+' '})
+            # _found = list(map(lambda x: x.decode('utf-8'), found))
+            _found = found#list(map(lambda x: x, found))
+            sen_strs = s.split(' ')
+            # print(sen_strs)
+            print(s)
+            print('FOUND:   ', _found)
+
+            for f in _found:
+                ori_found.extend(list(filter(lambda x: (' '+x+' ').find(f)>=0, sen_strs)))
+            print('ORIGIN:   ', ori_found)
+            ori_found = check_duplicates(_found, ori_found)
+            ori_found = list(set(map(lambda x: str(x).strip(), ori_found)))
+            update_list_m.append({'id':id, 'drug':' '+' , '.join(ori_found)+' '})
 
     if len(update_list_m)>0:
         print('update m')
         copy_into_table_m('drug', update_list_m)
 
+def check_duplicates(first_f, origin_f):
+    single_words_f = list(filter(lambda x: x.strip().find(' ')<0, first_f))
+    for s in single_words_f:
+        if s in origin_f:
+            first_f.remove(s)
+    origin_f.extend(first_f)
+    print(origin_f)
+    return origin_f
+
 def update_llts(ids):
     side_effects = list(map(lambda x: x[0], get_side_effects()))
     keyword_processor = KeywordProcessor(case_sensitive=False)
     for side in side_effects:
-        keyword_processor.add_keyword((side.strip()).encode('utf-8'))                 
-        keyword_processor.add_keyword((' '+side.strip()+' ').encode('utf-8'))
-        keyword_processor.add_keyword(('-'+side.strip()).encode('utf-8'))
-        keyword_processor.add_keyword((side.strip()+'-').encode('utf-8'))
+        side = side.encode('ascii', 'replace').decode('ascii')
+        side = side.replace('?', ' ')
+        keyword_processor.add_keyword((' '+side.strip()))#.encode('ascii', 'replace'))
+        keyword_processor.add_keyword((side.strip()+' '))#.encode('ascii', 'replace'))
+        keyword_processor.add_keyword((' '+side.strip()+' '))#.encode('ascii', 'replace'))
+        keyword_processor.add_keyword(('-'+side.strip()))#.encode('ascii', 'replace'))
+        keyword_processor.add_keyword((side.strip()+'-'))#.encode('ascii', 'replace'))
 
 #     update_list = []
 #     sentences = get_sentences_to_search(ids)
@@ -165,12 +193,12 @@ def update_llts(ids):
 #         id = sen[0]
 
 #         found = []
-#         found = keyword_processor.extract_keywords(sen[1].encode('utf-8').strip().lower())
+#         found = keyword_processor.extract_keywords(sen[1].encode('ascii', 'replace').strip().lower())
 #         if len(found)>0:
 #             _found = list(map(lambda x: x.decode('utf-8'), found))
-#             sen_strs = sen[1].encode('utf-8').strip().lower().split(' ')                                                   
+#             sen_strs = sen[1].encode('ascii', 'replace').strip().lower().split(' ')
 #             print(_found)
-#             print(sen[1].encode('utf-8').strip().lower())
+#             print(sen[1].encode('ascii', 'replace').strip().lower())
 #             update_list.append({'id':id, 'adverse_effect':' '+' , '.join(_found)+' '})
 
 #     if len(update_list)>0:
@@ -183,17 +211,26 @@ def update_llts(ids):
     for sen in sentences_m:
         id = sen[0]
 
-        ori_found = []                                                      
+        ori_found = []
         found = []
-        found = keyword_processor.extract_keywords(sen[1].encode('utf-8').strip().lower())
+        s = (u' '+sen[1].lower()).encode('ascii', 'replace').decode('ascii')
+        s = str(s).replace('?', ' ')
+        print(s)
+        found = keyword_processor.extract_keywords(s)
         if len(found)>0:
-            _found = list(map(lambda x: x.decode('utf-8'), found))
-            sen_strs = sen[1].encode('utf-8').strip().lower().split(' ')                                                   
-            print(_found)
-            print(sen[1].encode('utf-8').strip().lower())
+            # _found = list(map(lambda x: x.decode('utf-8'), found))
+            _found = found
+            sen_strs = s.split(' ')
+            # print(sen_strs)
+            print(s)
+            print('FOUND:   ', _found)
+
             for f in _found:
-                ori_found.extend(list(filter(lambda x: x.find(f)>=0, sen_strs)))
-            update_list_m.append({'id':id, 'adverse_effect':' '+' , '.join(list(set(ori_found)))+' '})
+                ori_found.extend(list(filter(lambda x: (' '+x+' ').find(f)>=0, sen_strs)))
+            print('ORIGIN:   ', ori_found)
+            ori_found = check_duplicates(_found, ori_found)
+            ori_found = list(set(map(lambda x: str(x).strip(), ori_found)))
+            update_list_m.append({'id':id, 'adverse_effect':' '+' , '.join(ori_found)+' '})
 
     if len(update_list_m)>0:
         print('update m')
