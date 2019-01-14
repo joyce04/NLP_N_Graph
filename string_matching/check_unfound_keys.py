@@ -52,30 +52,52 @@ def copy_into_table_m(col, rows):
     conn.commit()
     print(row_count)
 
+def update_check_col(col, _id, name):
+    print(_id, name)
+    if col == 'check_drug':
+        update_sql = """
+            UPDATE article_table_sentences_m
+            SET check_drug = %s
+            WHERE id = %s
+        """
+    else:
+        update_sql = """
+            UPDATE article_table_sentences_m
+            SET check_ad = %s
+            WHERE id = %s
+        """
+
+    _cur = conn.cursor()
+    _cur.execute(update_sql, (name, _id))
+    conn.commit()
+    # print(_cur.rowcount)
+
+
 def get_unserached_entities(col, keywords):
     file = open(col+'_check.tsv', 'w')
 
     _cur = conn.cursor()
 
     for k in keywords:
+        print(k)
         if col=='check_drug':
-            print(k)
             _cur.execute(
-                '''
+                """
                     SELECT id, sentence, check_drug
                     FROM article_table_sentences_m
                     WHERE lower(sentence) like %s
                     AND lower(drug) not like %s
-                ''' % ("'%"+k.strip()+"%'", "'%"+k.strip()+"%'")
+                """, ("%"+k.strip()+"%", "%"+k.strip()+"%")
             )
+            # print(cursor.mogrify(SQL, ("%"+k.strip()+"%", "%"+k.strip()+"%")))
         else:
             _cur.execute(
-            '''
+            """
                 SELECT id, sentence, check_ad
                 FROM article_table_sentences_m
                 WHERE lower(sentence) like %s
                 AND lower(adverse_effect) not like %s
-            ''' % ("'%"+k.strip()+"%'", "'%"+k.strip()+"%'")
+            """, ("%"+k.strip()+"%", "%"+k.strip()+"%")
             )
 
         fetched = _cur.fetchall()
@@ -87,7 +109,7 @@ def get_unserached_entities(col, keywords):
             print(len(fetched))
             # print(fetched[0])
             for a in fetched:
-                s = a[1].strip().lower()
+                s = a[1].strip().lower().replace('=', ' = ').replace(']', ' ] ')
                 # print(s)
                 front_end = s.split(k)
                 # print(front_end)
@@ -105,7 +127,18 @@ def get_unserached_entities(col, keywords):
                         end_space = front_end[0].find(' ')
                         front_space = a_loc
                 # print(s[front_space:a_loc+len(k)+end_space+1])
-                name = s[front_space:a_loc+len(k)+end_space+1]
+                name = s[front_space:a_loc+len(k)+end_space+1].strip()
+                if name == k.strip():
+                    if a[2] is not None:
+                        name = a[2]+' , '+name
+                    update_check_col(col, a[0], name)
+                else:
+                    replace_phrases = ['-controlled', '-treated', '-based', '-related', '-releasing']
+                    name = name.replace(')', '').replace(':', '').replace('(', '').replace('+', '').replace('*', '').replace('[', '').replace('.', '').replace(',', '').replace('%', '')
+                    if name.strip():
+                        if a[2] is not None:
+                            name = a[2]+' , '+name
+                        update_check_col(col, a[0], name)
                 ch_founds.append(name)
                 # update_list_m.append({'id':a[0], col:a[2]+' , '+name})
 
@@ -113,17 +146,17 @@ def get_unserached_entities(col, keywords):
         #     copy_into_table_m('drug', update_list_m)
 
         if len(ch_founds)>1:
-            ch_founds = list(set(map(lambda x: x.strip().replace(')', '').replace(':', '').replace('(', '').replace('+', '').replace('*', '').replace('[', ''), ch_founds)))
-            print(ch_founds)
+            ch_founds = list(set(filter(lambda x: x.strip(), ch_founds)))
+
             if len(ch_founds)>1:
-                ch_founds.remove(k)
+                # ch_founds = list(filter(lambda x: x.strip() != k.strip(), ch_founds))
+                ch_founds.remove(k.strip())
+                print(ch_founds)
                 file.write(k+'\t'+' , '.join(ch_founds)+'\n')
     file.close()
 
 conn = get_connection()
 drugs = get_dr_keywords()
 get_unserached_entities('check_drug', drugs)
-sd = get_sd_keywords()
-get_unserached_entities('check_drug_ad', sd)
-# print('drugs:', len(drugs))
-# print('sd:', len(sd))
+# sd = get_sd_keywords()
+# get_unserached_entities('check_drug_ad', sd)
