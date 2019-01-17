@@ -5,7 +5,7 @@ from aho_corasick import search
 
 def get_side_effects():
     _cur = conn.cursor()
-    select_sql = """select distinct(lower(llt_name)) from meddra_llt_180717 WHERE exclude=0 order by lower(llt_name)"""
+    select_sql = """select distinct(lower(llt_name)) from meddra_llt_180717 WHERE exclude=0 AND lower(llt_name)>='u' order by lower(llt_name)"""
     _cur.execute(select_sql)
     return _cur.fetchall()
 
@@ -74,7 +74,7 @@ def update_check_col(col, _id, name):
 
 
 def get_unserached_entities(col, keywords):
-    file = open(col+'_check.tsv', 'w')
+    file = open(col+'_check_2.tsv', 'w')
 
     _cur = conn.cursor()
 
@@ -133,7 +133,9 @@ def get_unserached_entities(col, keywords):
                         name = a[2]+' , '+name
                     update_check_col(col, a[0], name)
                 else:
-                    replace_phrases = ['-controlled', '-treated', '-based', '-related', '-releasing']
+                    replace_phrases = ['-controlled', '-treated', '-based', '-related', '-releasing', '-containing', '75mg', '≥5', 'senegal', '-positive',\
+                    '-naïve', '8 × ', 'post-', '-stimulating', '-eluting', '-like', '-related', '-equivalent', '-receptor', '-only', '-dose-dense',\
+                    '-confirmed', '≥110', '-induced', '-dependent', '-independent', 'mothers' , 'bothersome', '-inhibiting', '-binding', '-boosted', 'inhibitor-']
                     name = name.replace(')', '').replace(':', '').replace('(', '').replace('+', '').replace('*', '').replace('[', '').replace('.', '').replace(',', '').replace('%', '')
                     if name.strip():
                         if a[2] is not None:
@@ -156,7 +158,7 @@ def get_unserached_entities(col, keywords):
     file.close()
 
 conn = get_connection()
-drugs = get_dr_keywords()
-get_unserached_entities('check_drug', drugs)
-# sd = get_sd_keywords()
-# get_unserached_entities('check_drug_ad', sd)
+# drugs = get_dr_keywords()
+# get_unserached_entities('check_drug', drugs)
+sd = get_sd_keywords()
+get_unserached_entities('check_drug_ad', sd)
