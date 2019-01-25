@@ -5,7 +5,7 @@ from aho_corasick import search
 
 def get_side_effects():
     _cur = conn.cursor()
-    select_sql = """select distinct(lower(llt_name)) from meddra_llt_180717 WHERE exclude=0 AND lower(llt_name)>='u' order by lower(llt_name)"""
+    select_sql = """select distinct(lower(llt_name)) from meddra_llt_180717 WHERE exclude=0 AND lower(llt_name)>='x' order by lower(llt_name)"""
     _cur.execute(select_sql)
     return _cur.fetchall()
 
