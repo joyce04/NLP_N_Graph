@@ -121,27 +121,31 @@ def iterate_pagerank(_ordered_vals, _df_pro_entities):
 
 ## random order
 def iterate_random(_ordered_vals, _df_pro_entities, _id_list):
-        copy_pro_entities = _df_pro_entities.copy(deep=True)
+    copy_pro_entities = _df_pro_entities.copy(deep=True)
 
-        already_annotated = []
-        iter_no = 0
-        while(len(copy_pro_entities)>0):
-            ran_id = choice(_id_list)
-            _id_list.remove(ran_id)
+    already_annotated = []
+    iter_no = 0
+    while(len(copy_pro_entities)>0):
+        if len(_id_list)==0:
+            _id_list.extend(copy_pro_entities.id.unique())
+#             print(copy_pro_entities)
+            
+        ran_id = choice(_id_list)
+        _id_list.remove(ran_id)
 
-            if len(copy_pro_entities.loc[copy_pro_entities.id.eq(ran_id)])==0:
-                continue
+        if len(copy_pro_entities.loc[copy_pro_entities.id.eq(ran_id)])==0:
+            continue
 
-            annotated_keywords = copy_pro_entities.loc[copy_pro_entities.id.eq(ran_id)].val.unique()
-            already_annotated.append({'id': ran_id, 
-                                      'keywords': annotated_keywords})
+        annotated_keywords = copy_pro_entities.loc[copy_pro_entities.id.eq(ran_id)].val.unique()
+        already_annotated.append({'id': ran_id, 
+                                    'keywords': annotated_keywords})
 
-            copy_pro_entities = copy_pro_entities.loc[(copy_pro_entities.id!=ran_id) & (~copy_pro_entities.val.isin(annotated_keywords))]
-            copy_pro_entities.sort_index(inplace=True)
+        copy_pro_entities = copy_pro_entities.loc[(copy_pro_entities.id!=ran_id) & (~copy_pro_entities.val.isin(annotated_keywords))]
+        copy_pro_entities.sort_index(inplace=True)
 
-            for an in annotated_keywords:
-                _ordered_vals.remove(an)
-            iter_no += 1
+        for an in annotated_keywords:
+            _ordered_vals.remove(an)
+        iter_no += 1
         
-#         print(iter_no)
-        return iter_no
+#       print(iter_no)
+    return iter_no
