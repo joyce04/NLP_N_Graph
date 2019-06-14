@@ -22,13 +22,14 @@ def iterate_greedy(ordered_vals, _copy_pro_entities):
 
     already_annotated = []
     iter_no = 0
-    
+    ordered_ids = []
     # 제일 빈도수 높은 entity를 많이 포함하고 있는 문서 부터 annotate
     while(len(_copy_pro_entities)>0):
         val = ordered_vals[0]
 
         found_df = find_most_effective_recursively(_copy_pro_entities, ordered_vals, 0)
         found_id = found_df.id
+        ordered_ids.append(found_id)
         
         annotated_keywords = _copy_pro_entities.loc[_copy_pro_entities.id.eq(found_id)].val.unique()
         if len(annotated_keywords)==0:
@@ -47,7 +48,7 @@ def iterate_greedy(ordered_vals, _copy_pro_entities):
         iter_no += 1
 
 #     print(iter_no)
-    return iter_no
+    return iter_no, ordered_ids
 
 ## pagerank with random walk
 def generate_edge_weights(_df_pro_entities):
@@ -125,13 +126,15 @@ def iterate_random(_ordered_vals, _df_pro_entities, _id_list):
 
     already_annotated = []
     iter_no = 0
+    s_id_list = sample(_id_list, len(_id_list))
     while(len(copy_pro_entities)>0):
-        if len(_id_list)==0:
-            _id_list.extend(copy_pro_entities.id.unique())
+        if len(s_id_list)==0:
+            s_id_list.extend(copy_pro_entities.id.unique())
 #             print(copy_pro_entities)
             
-        ran_id = choice(_id_list)
-        _id_list.remove(ran_id)
+#         ran_id = choice(_id_list)
+#         _id_list.remove(ran_id)
+        ran_id = s_id_list.pop()
 
         if len(copy_pro_entities.loc[copy_pro_entities.id.eq(ran_id)])==0:
             continue
