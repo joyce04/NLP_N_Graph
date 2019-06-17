@@ -1,0 +1,52 @@
+fundamental task of all neural networks is credit assignment
+= learning is the process by figuring out which input features correlate highly with the outcomes the net tries to predict.
+
+ELMo
+- Gains language understanding from being trained to predict the next word in a sequence of words [Language Modeling]
+- ELMo representations are a function of all of the internal layers of bi-LSTM.
+- [Higher level states of the bi-LSTM capture context, Lower level captures syntax well]
+  - 1st layer performs better on POS tagging
+  - 2nd layer performs better on a word-sense disambiguation
+- Not use a fixed embedding for each word, ELMo looks at the entire sentence before assigning each word in it.
+** In standard word embeddings (GloVe, Fast Text, Word2Vec), each instance of the word would have the same representation.
+
+UMLFiT
+- ** With only 100 labeled examples, it matches the performance of training from scratch on 100x more data.
+- Based on AWD-LSTM(multi-layer bi-LSTM network without attention)
+- Propose two training techniques for stabilizing the fine-tuning process.
+  - Discriminative fine-tuning : different layers of language model capture different types of information.
+  => tune each layer with different learning rates.
+  - Slanted triangular learning rates
+
+Open AI GPT
+- Similar to ELMo with a much larger scale (free text corpora)
+- Different architecture to ELMo : multi-layer transformer decoder
+- Adaption of attention
+- Limitation : uni-directional nature that the model is only trained to predict the future left-to-right context.
+
+Transformer = [encoder, decoder]
+- Use attention : look at an input sequence and decide at each step which other parts of the sequence are important.
+= encoder writes the translation + important keywords and gives to the decoder
+= keywords make the translation easier for the decoder
+
+BERT
+- descendent to GPT
+- train a large language model on free text and then fine-tune on specific tasks without customized network architectures.
+- ** bi-directional
+
+Transfer learning
+- Refers to the use of a model that has been trained to solve one problem as the basis to solve some other somewhat similar problem.
+- ** fine-tuned model doesn't have to learn from scratch, it can generally reach higher accuracy with much less data and computation time than models without transfer learning.
+- ** pre-trained models as feature extractor = layered architecture allows utilization of a pre-trained network without its final layer as a fixed feature extractor for other tasks.
+
+Attention
+- Filters the perceptions that can be stored in memory -> filters again on a second pass when they are retrieved from memory.
+- works for long-range dependencies = knows how to disregard the noise and focus on what's relevant.
+- memory networks work with external data storage -> attention can pull a distant episode from the past as encoded in memory.
+  memory is an accumulation of a sequence of embeddings.
+
+
+References :
+- https://towardsdatascience.com/from-word-embeddings-to-pretrained-language-models-a-new-age-in-nlp-part-2-e9af9a0bdcd9
+- https://lilianweng.github.io/lil-log/2019/01/31/generalized-language-models.html#input-embedding
+- https://skymind.ai/wiki/attention-mechanism-memory-network
