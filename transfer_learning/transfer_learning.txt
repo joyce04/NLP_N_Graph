@@ -1,3 +1,5 @@
+*Information organized and collected for Personal study only.
+
 fundamental task of all neural networks is credit assignment
 = learning is the process by figuring out which input features correlate highly with the outcomes the net tries to predict.
 
@@ -35,7 +37,23 @@ BERT
 - ** bi-directional
 
 Transfer learning
-- Refers to the use of a model that has been trained to solve one problem as the basis to solve some other somewhat similar problem.
+- Refers to the use of a model that has been trained to solve one problem as the basis to solve some other somewhat similar problem. = Ability to transfer learning to new conditions.
+- Traditional supervised learning breaks down when we do not have sufficient labeled data for the task. -> transfer learning leverage the already existing labeled data of some related task or domain.
+- Definition : A Domain D consists of a feature space S and a marginal probability distribution P(X) over the feature space, where X = x1, ... xn belong to S.
+  ex) document classification with bag-of-words) S = space of all document representations, xi = ith term vector, X = sample training documents
+  D = {S, P(X)},
+  Task T consists of a label space Y and conditional probability distribution P(Y|X) that is learned from the training data.
+  => Given a source domain Ds, source task Ts and a target domain Dt and target task Tt,
+  the objective of transfer learning now is to enable us to learn the target conditional probability distribution P(Yt|Xt) in Dt with the information gained from Ds and Ts where Ds=/=Dt or Ts=/=Tt.
+    1. Ss =\= St, the feature spaces of the source and target domain are different.
+    ex) documents are written in two different languages.
+    2. P(Xs)=\=P(Xt), marginal probability distributions of source and target domain are different.
+    ex) documents discuss different topics. (Domain adaptation)
+    3. Ys=\=Yt, label spaces different.
+    ex) documents need to be assigned different labels in the target task.
+    4. P(Ys|Xs)=\=P(Yt|Xt), conditional probability distributions of the source and target tasks are different.
+    ex) source and target documents are unbalanced with regard to their classes.
+
 - ** fine-tuned model doesn't have to learn from scratch, it can generally reach higher accuracy with much less data and computation time than models without transfer learning.
 - ** pre-trained models as feature extractor = layered architecture allows utilization of a pre-trained network without its final layer as a fixed feature extractor for other tasks.
 
@@ -45,8 +63,8 @@ Attention
 - memory networks work with external data storage -> attention can pull a distant episode from the past as encoded in memory.
   memory is an accumulation of a sequence of embeddings.
 
-
 References :
 - https://towardsdatascience.com/from-word-embeddings-to-pretrained-language-models-a-new-age-in-nlp-part-2-e9af9a0bdcd9
 - https://lilianweng.github.io/lil-log/2019/01/31/generalized-language-models.html#input-embedding
 - https://skymind.ai/wiki/attention-mechanism-memory-network
+- http://ruder.io/transfer-learning/index.html#whatistransferlearning
